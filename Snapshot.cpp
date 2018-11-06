@@ -173,55 +173,54 @@ std::ostream & operator<<(std::ostream & os, Snapshot const & snapshot) {
 	return os;
 }
 
-#define pullChar(stream, ch)						\
-	do {											\
-		int c = stream.get();						\
-		if (!isspace(c)) {							\
-			if (c == ch)							\
-				break;								\
-			else {									\
-				stream.unget();						\
-				return stream;						\
-			}										\
-		}											\
-	} while (true)
+inline void clearSpaces(std::istream &is) {
+	while (isspace(is.peek())) is.get();
+}
+
+inline void clearChar(std::istream &is, char c) {
+	if (is.peek() == c) is.get();
+}
+
+#define clearCharOrStop(stream, ch)	\
+	if (stream.get() != ch) {		\
+		stream.unget();				\
+		return stream;				\
+	}								\
 
 
-#define pullCharOrFail(stream, ch)					\
-	do {											\
-		int c = stream.get();						\
-		if (!isspace(c)) {							\
-			if (c == ch)							\
-				break;								\
-			else {									\
-				stream.unget();						\
-				stream.setstate(std::ios::failbit);	\
-				return stream;						\
-			}										\
-		}											\
-	} while (true)
+#define clearCharOrFail(stream, ch)			\
+	if (stream.get() != ch) {				\
+		stream.setstate(std::ios::failbit);	\
+		stream.unget();						\
+		return stream;						\
+	}
 
 inline std::istream& parseCounts(std::istream &is, size_t &integerCount, size_t &floatCount, size_t &stringCount, size_t &objectCount) {
 	char c;
 	if (is.bad()) return is;
 
-	pullChar(is, '[');
+	clearSpaces(is);
+	clearCharOrStop(is, '[');
 
 	is >> integerCount;
 	if (is.bad()) return is;
-	pullCharOrFail(is, ',');
+	clearSpaces(is);
+	clearCharOrFail(is, ',');
 
 	is >> floatCount;
 	if (is.bad()) return is;
-	pullCharOrFail(is, ',');
+	clearSpaces(is);
+	clearCharOrFail(is, ',');
 	
 	is >> stringCount;
 	if (is.bad()) return is;
-	pullCharOrFail(is, ',');
+	clearSpaces(is);
+	clearCharOrFail(is, ',');
 	
 	is >> objectCount;
 	if (is.bad()) return is;
-	pullCharOrFail(is, ']');
+	clearSpaces(is);
+	clearCharOrFail(is, ']');
 }
 
 inline snapshot_string_t readString(std::istream &is) {
@@ -257,7 +256,8 @@ std::istream & operator>>(std::istream &is, Snapshot &snapshot) {
 
 	if (!s) return is;
 
-	pullCharOrFail(is, '{');
+	clearSpaces(is);
+	clearCharOrFail(is, '{');
 
 	size_t intCount, floatCount, stringCount, objectCount;
 	intCount = floatCount = stringCount = objectCount = 0;
@@ -269,21 +269,25 @@ std::istream & operator>>(std::istream &is, Snapshot &snapshot) {
 	
 	int c = is.peek();
 	while (c != '}' && c != EOF) {
-		while (isspace(is.peek())) is.get();
-		if (is.peek() == ',') is.get();
+		clearSpaces(is);
+		clearChar(is, ',');
+		clearSpaces(is);
 
-		pullCharOrFail(is, '(');
+		clearCharOrFail(is, '(');
 		
 		std::string key = getKey(is);
 		if (is.bad()) break;
 
-		pullCharOrFail(is, ',');
+		clearSpaces(is);
+		clearCharOrFail(is, ',');
 		Snapshot::ValueType type;
 		is >> type;
 
 		if (is.bad()) break;
-		pullCharOrFail(is, ')');
-		pullCharOrFail(is, ':');
+		clearSpaces(is);
+		clearCharOrFail(is, ')');
+		clearSpaces(is);
+		clearCharOrFail(is, ':');
 
 		snapshot_int_t integer;
 		snapshot_float_t real;
@@ -313,11 +317,12 @@ std::istream & operator>>(std::istream &is, Snapshot &snapshot) {
 		}
 
 		if (is.bad()) break;
-		while (isspace(is.peek())) is.get();
+		clearSpaces(is);
+
 		c = is.peek();
 	}
 
-	pullCharOrFail(is, '}');
+	clearCharOrFail(is, '}');
 
 	return is;
 }
