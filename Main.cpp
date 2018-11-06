@@ -1,5 +1,6 @@
 #include "Snapshot.h"
 
+#include <sstream>
 #include <iostream>
 
 int main() {
@@ -15,7 +16,21 @@ int main() {
 
 	std::cout << "Test should be 12, it is: " << item.value.integer << std::endl;
 
-	std::cout << snapshot;
+	std::cout << "Before serialization: " << std::endl;
+	std::cout << snapshot << std::endl;
+
+	std::stringstream testStream;
+	testStream << snapshot;
+
+	// Just to make sure
+	snapshot = Snapshot();
+	std::cout << "Make sure the snapshot is empty:" << std::endl;
+	std::cout << snapshot << std::endl;
+
+	testStream >> snapshot;
+
+	std::cout << "After deserialization: " << std::endl;
+	std::cout << snapshot << std::endl;
 
 	std::cin >> item.value.integer;
 

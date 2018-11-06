@@ -7,7 +7,7 @@ The serializable_type_t can be changed to suit your needs, for example the Key c
 ## Features:
 [x] Json-typed map (excluding arrays)
 [x] stream serialization
-[ ] stream deserialization
+[x] stream deserialization
 [ ] saving to JSON file
 [ ] loading from JSON file
 

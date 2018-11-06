@@ -6,7 +6,10 @@
 #include <unordered_map>
 #include <vector>
 
+// If you use extractable types just set this to false end define snapshot_key_t to an extractable type and you're good
+#define SNAPSHOT_KEY_IS_STRING	true
 typedef std::string snapshot_key_t;
+
 typedef int			snapshot_int_t;
 typedef float		snapshot_float_t;
 typedef std::string snapshot_string_t;
@@ -24,7 +27,6 @@ Possible features:
 * support for arbitrary arrays of ValueTypes
 */
 class Snapshot {
-	friend std::ostream& operator<<(std::ostream &os, Snapshot const &snapshot);
 public:
 	// Valute type of a stored item
 	enum ValueType {
@@ -37,11 +39,19 @@ public:
 	struct Item {
 		ValueType type;
 		union Value {
-			int					integer;
-			float				real;
-			snapshot_string_t	*string;	// Reference to make sure it packs into small number of bits
-			Snapshot			*object;	// Reference to make sure it packs into 64-bits
+			snapshot_int_t			integer;
+			snapshot_float_t		real;
+			snapshot_string_t const	*string;	// pointer to make sure it packs into small number of bits
+			Snapshot const			*object;	// pointer to make sure it packs into 64-bits
 		} value;
+
+		Item(snapshot_int_t);
+		Item(snapshot_float_t);
+		Item(snapshot_string_t const &);
+		Item(Snapshot const &);
+
+		friend std::ostream& operator<<(std::ostream &os, ValueType const &type);
+		friend std::istream& operator>>(std::istream &is, ValueType &type);
 	};
 	struct KeyNotFountException : public std::exception {
 		KeyNotFountException(snapshot_key_t const &);
@@ -55,6 +65,7 @@ public:
 	Snapshot(size_t reservedIntegerCount = 0, size_t reservedFloatCount = 0, size_t reservedStringCount = 0, size_t reservedObjectCount = 0);
 	~Snapshot();
 
+	// Please avoid having '"' in the key!, it will not serialize correctly!
 	void put(snapshot_key_t const &key, snapshot_int_t const & value);
 	void put(snapshot_key_t const &key, snapshot_float_t const & value);
 	void put(snapshot_key_t const &key, snapshot_string_t const &value);
@@ -64,7 +75,10 @@ public:
 	Attempts to get the item associated with a given key.
 	Throws KeyNotFountException if there is no association with a given key.
 	*/
-	Item get(snapshot_key_t const &key);
+	Item get(snapshot_key_t const &key) const;
+
+	friend std::ostream& operator<<(std::ostream &os, Snapshot const &snapshot);
+	friend std::istream& operator>>(std::istream &is, Snapshot &snapshot);
 
 private:
 	std::unordered_map<snapshot_key_t, std::pair<ValueType, size_t>> header;
@@ -74,5 +88,3 @@ private:
 	std::vector<snapshot_string_t>	strings;
 	std::vector<Snapshot>			objects;
 };
-
-std::ostream &operator<<(std::ostream &os, Snapshot const &snapshot);
