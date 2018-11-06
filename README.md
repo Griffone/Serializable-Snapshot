@@ -5,14 +5,14 @@ The key is to reduce unnecessary memory footprint of union structs to make it ma
 The serializable_type_t can be changed to suit your needs, for example the Key can be an enum, if all your snapshots have limited number of known fields.
 
 ## Features:
-[x] Json-typed map (excluding arrays)
-[x] stream serialization
-[x] stream deserialization
-[ ] saving to JSON file
-[ ] loading from JSON file
+- [x] Json-typed map (excluding arrays)
+- [x] stream serialization
+- [x] stream deserialization
+- [ ] saving to JSON file
+- [ ] loading from JSON file
 
 ## Features that can potentially be implemented in the future:
-[ ] Array type support
-[ ] Correct cross-platform serialization-deserialization
-[ ] Difference calculation
-[ ] Delta compression 
+- [ ] Array type support
+- [ ] Correct cross-platform serialization-deserialization
+- [ ] Difference calculation
+- [ ] Delta compression 

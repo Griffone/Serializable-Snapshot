@@ -6,17 +6,15 @@
 int main() {
 
 	Snapshot snapshot = {};
+	Snapshot b = {};
+	b.put("nested", "object");
 
-	snapshot.put("test", 12);
-	snapshot.put("answer", 42);
+	snapshot.put("integer", 42);
+	snapshot.put("float", 6.9f);
+	snapshot.put("string", "bytes");
+	snapshot.put("object", b);
 
-	snapshot.put("name", "test snapshot");
-
-	auto item = snapshot.get("test");
-
-	std::cout << "Test should be 12, it is: " << item.value.integer << std::endl;
-
-	std::cout << "Before serialization: " << std::endl;
+	std::cout << "Before serialization:" << std::endl;
 	std::cout << snapshot << std::endl;
 
 	std::stringstream testStream;
@@ -24,15 +22,23 @@ int main() {
 
 	// Just to make sure
 	snapshot = Snapshot();
-	std::cout << "Make sure the snapshot is empty:" << std::endl;
+	std::cout << "After clearing:" << std::endl;
 	std::cout << snapshot << std::endl;
 
 	testStream >> snapshot;
 
-	std::cout << "After deserialization: " << std::endl;
+	std::cout << "After deserialization:" << std::endl;
 	std::cout << snapshot << std::endl;
 
-	std::cin >> item.value.integer;
+
+	std::cout << "Try to make one yourself:" << std::endl;
+	std::cin >> snapshot;
+
+	std::cout << "User object:" << std::endl;
+	std::cout << snapshot << std::endl;
+
+	int i;
+	std::cin >> i;
 
 
 	return 0;
